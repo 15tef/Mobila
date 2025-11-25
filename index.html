@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Dressing și Pantofar</title>
+<meta name="description" content="Produse speciale Dressing și Pantofar. Comandă online produse unice și de calitate!">
+<style>
+  :root{
+    --bg:#f9f9f9; --brand:#3a7d44; --accent:#2e5d34; --muted:#d0d0d0; --text:#333;
+  }
+  *{box-sizing:border-box;}
+  body{font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin:0; padding:0; background:var(--bg); color:var(--text);}
+  img{max-width:100%; display:block;}
+  main{max-width:1100px;margin:0 auto;}
+
+  header{position:relative;text-align:center;padding:50px 20px;background: linear-gradient(135deg,#d0f0c0,#f0f9f0); color:white; box-shadow:0 5px 15px rgba(0,0,0,0.08);}
+  header h1{font-size:2.4rem; margin-bottom:6px;}
+  header p{font-size:1rem; margin:0;}
+  .cart-btn{position:absolute; top:20px; right:20px; background:var(--accent); color:white; padding:10px 15px; border:none; border-radius:12px; cursor:pointer; font-weight:700;}
+
+  nav{display:flex; justify-content:center; gap:25px; background:#f0f9f0; padding:12px 0; font-weight:700; position:sticky; top:0; z-index:100;}
+  nav a{color:#2e5d34; text-decoration:none; padding:6px 10px; border-radius:6px; cursor:pointer;}
+  nav a:hover, nav a.active{color:var(--brand);}
+
+  section{padding:30px; text-align:center; display:none; opacity:0; transform:translateY(20px); transition:opacity .35s ease, transform .35s ease;}
+  section.active{display:block; opacity:1; transform:translateY(0);}
+
+  .produse-container{display:flex; flex-wrap:wrap; justify-content:center; gap:25px;}
+  .produs{position:relative; background:white; border-radius:15px; overflow:hidden; width:260px; box-shadow:0 8px 20px rgba(0,0,0,0.12); transition:transform .25s, box-shadow .25s;}
+  .produs:hover{transform:translateY(-10px) scale(1.02); box-shadow:0 20px 35px rgba(0,0,0,0.18);}
+  .produs img{width:100%; height:200px; object-fit:cover; cursor:pointer;}
+  .produs h3{margin:10px 0 5px;}
+  .produs p{margin:5px 0; font-size:.95rem; color:#555; text-align:center;}
+  .add-cart-btn{margin:8px 0; padding:12px 20px; width:90%; border:none; border-radius:25px; font-weight:700; cursor:pointer; background:linear-gradient(90deg,var(--brand),var(--accent)); color:#fff;}
+  .add-cart-btn:hover{filter:brightness(.98);}
+
+  .badge{position:absolute; top:10px; left:10px; background:var(--brand); color:white; padding:5px 10px; border-radius:12px; font-size:.8rem; font-weight:700;}
+
+  .popup-form{display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); justify-content:center; align-items:flex-start; padding-top:20px; z-index:1200; opacity:0; transition:opacity .2s;}
+  .popup-form.active{display:flex; opacity:1;}
+  .popup-content{background:var(--bg); padding:18px; border-radius:14px; width:92%; max-width:420px; text-align:left; position:relative; box-shadow:0 10px 25px rgba(0,0,0,0.18);}
+  .popup-content h3{text-align:center; margin-bottom:10px; color:var(--brand);}
+  .popup-content label{display:block; margin-top:10px; font-weight:700; font-size:.95rem;}
+  .popup-content input, .popup-content select{width:100%; padding:8px 10px; margin-top:6px; border-radius:6px; border:1px solid var(--muted); font-size:.95rem;}
+  .popup-content button{margin-top:14px;padding:10px;font-size:1rem;width:100%; background:linear-gradient(90deg,var(--brand),var(--accent)); color:#fff; border:none; border-radius:8px; font-weight:700;}
+  .close-popup{position:absolute; top:12px; right:12px; cursor:pointer; font-size:20px; color:var(--brand); background:none; border:none;}
+
+  .notification{position:fixed; top:20px; left:50%; transform:translateX(-50%); background:var(--brand); color:#fff; padding:12px 20px; border-radius:25px; display:none; z-index:2000; font-weight:700;}
+  .notification.show{display:block;}
+
+  #lightbox{display:none; position:fixed; inset:0; background:rgba(0,0,0,.85); justify-content:center; align-items:center; z-index:2000;}
+  #lightbox.active{display:flex;}
+  #lightbox img{max-width:70%; max-height:70%; display:block; margin:auto; border-radius:12px;}
+  #prevArrow,#nextArrow{position:absolute; top:50%; transform:translateY(-50%); font-size:36px; color:white; background:none; border:none; cursor:pointer;}
+  #prevArrow{left:20px;}
+  #nextArrow{right:20px;}
+
+  #cartContainer table{width:100%; border-collapse:collapse; margin-top:12px;}
+  #cartContainer th, #cartContainer td{border:1px solid var(--muted); padding:8px; text-align:center;}
+  #cartContainer th{background:#f0f9f0;}
+  .qtyInput{width:60px; text-align:center;}
+
+  footer{text-align:center; background:var(--muted); color:white; padding:18px; margin-top:30px; border-radius:12px 12px 0 0;}
+
+  @media (max-width:700px){
+    header h1{font-size:1.6rem;}
+    .produs{width:90%;}
+    nav{flex-wrap:wrap;}
+  }
+
+  body.modal-open{overflow:hidden;}
+</style>
+</head>
+<body>
+
+<header id="home">
+  <h1>Dressing & Pantofar</h1>
+  <p>Produse speciale, comandă online rapidă și sigură!</p>
+  <button class="cart-btn" id="openCart">Coș (<span id="cartCount">0</span>)</button>
+</header>
+
+<nav>
+  <a class="nav-link" data-target="home">Home</a>
+  <a class="nav-link" data-target="produse">Produse</a>
+  <a class="nav-link" data-target="despre">Despre</a>
+  <a class="nav-link" data-target="contact">Contact</a>
+</nav>
+
+<main>
+  <section id="homeSection">
+    <h2>Bine ați venit!</h2>
+    <p>Descoperă produsele Dressing și Pantofar.<br> Comandă direct online și bucură-te de calitate!</p>
+    <img src="https://github.com/15tef/Cozonacii/blob/main/64c98023-2739-45d1-85f3-04a107ef2142.jpg?raw=true" alt="Produse Dressing si Pantofar" style="margin:20px auto; max-height:400px;">
+  </section>
+
+  <section id="produse">
+    <h2>Produsele noastre</h2>
+    <div class="produse-container" id="produseContainer">
+      <div class="produs" data-id="dressing" data-nume="Dressing Stejar" data-price="150">
+        <div class="badge">Popular</div>
+        <img src="https://github.com/15tef/Cozonacii/blob/main/64c98023-2739-45d1-85f3-04a107ef2142.jpg?raw=true" alt="Dressing Stejar">
+        <h3>Dressing Special</h3>
+        <p>Dulap din lemn de stejar, cu 3 uși și 6 compartimente.<br>Dimensiuni: L = 125 cm; l = 50 cm; h = 200 cm<br>Mobilierul are un aspect rustic și vintage, fiind potrivit pentru a crea o atmosferă călduroasă în orice încăpere.<br>Datorită dimensiunilor generoase, acest dulap oferă un spațiu de depozitare amplu, fiind ideal pentru a păstra haine, lenjerie sau alte obiecte.<br></p>
+        <p>Preț: 150 RON</p>
+        <button class="add-cart-btn">Adaugă în coș</button>
+      </div>
+
+      <div class="produs" data-id="pantofar" data-nume="Pantofar Elegant" data-price="400">
+        <div class="badge">Nou</div>
+        <img src="https://github.com/15tef/Cozonacii/blob/main/564aedf4-5601-4670-9e6c-b7f0da05cf70.jpg?raw=true" alt="Pantofar Lemn">
+        <h3>Pantofar Lemn</h3>
+        <p>Dulap pentru pantofi din lemn cu 2 uși.<br>Poate fi utilizat pentru depozitarea și organizarea pantofilor într-un spațiu compact.<br>Dimensiuni: L = 70 cm, l = 30 cm1, h = 75 cm</p>
+        <p>Preț: 400 RON</p>
+        <button class="add-cart-btn">Adaugă în coș</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="cartSection">
+    <h2>Coșul meu</h2>
+    <div id="cartContainer"></div>
+    <button id="checkoutBtn" style="margin-top:12px;padding:10px 18px;border-radius:8px;border:none;background:linear-gradient(90deg,var(--brand),var(--accent));color:#fff;font-weight:700;">Finalizează comanda</button>
+  </section>
+
+  <section id="despre">
+    <h2>Despre noi</h2>
+    <p>Noi oferim produse speciale Dressing și Pantofar, cu calitate premium și livrare rapidă.</p>
+  </section>
+
+  <section id="contact">
+    <h2>Contact</h2>
+    <p>Telefon: 0732 920 255</p>
+    <p>Email: a.stef89@yahoo.com</p>
+    <p>Adresa: Str. Malu Spart 1, București, România</p>
+  </section>
+</main>
+
+<footer>
+  <p>&copy; 2025 Dressing & Pantofar. Toate drepturile rezervate.</p>
+</footer>
+
+<!-- Popup formular -->
+<div class="popup-form" id="popupForm">
+  <div class="popup-content">
+    <button class="close-popup" id="closePopup">&times;</button>
+    <h3>Comandă produs</h3>
+    <form id="orderForm">
+      <label>Nume:</label><input type="text" id="nume" required>
+      <label>Prenume:</label><input type="text" id="prenume" required>
+      <label>Telefon:</label><input type="text" id="telefon" required placeholder="07XXXXXXXX">
+      <label>Email:</label><input type="email" id="emailClient" required>
+      <label>Metoda de plată:</label>
+      <select id="paymentMethod" required>
+        <option value="Cash la livrare">Cash la livrare</option>
+        <option value="Plată online">Plată online</option>
+      </select>
+      <button type="submit">Trimite comanda</button>
+    </form>
+  </div>
+</div>
+
+<div class="notification" id="notification"></div>
+
+<!-- Lightbox -->
+<div id="lightbox">
+  <button id="closeLightbox">&times;</button>
+  <button id="prevArrow">&#10094;</button>
+  <button id="nextArrow">&#10095;</button>
+  <img id="lightboxImg" src="" alt="">
+</div>
+
+<script>
+const sections = {home: document.getElementById('homeSection'), produse: document.getElementById('produse'), despre: document.getElementById('despre'), contact: document.getElementById('contact'), cart: document.getElementById('cartSection')};
+const navLinks = document.querySelectorAll('.nav-link');
+const openCartBtn = document.getElementById('openCart');
+const cartCount = document.getElementById('cartCount');
+const produseContainer = document.getElementById('produseContainer');
+const cartContainer = document.getElementById('cartContainer');
+const checkoutBtn = document.getElementById('checkoutBtn');
+const popup = document.getElementById('popupForm');
+const closePopup = document.getElementById('closePopup');
+const notification = document.getElementById('notification');
+const lightbox = document.getElementById('lightbox');
+const lightboxImg = document.getElementById('lightboxImg');
+const closeLightbox = document.getElementById('closeLightbox');
+const prevArrow = document.getElementById('prevArrow');
+const nextArrow = document.getElementById('nextArrow');
+const orderForm = document.getElementById('orderForm');
+
+let cart = [];
+let currentLightboxImages = [];
+let currentImgIndex = 0;
+
+// Function: Update cart UI
+function updateCartUI(){
+  const totalQty = cart.reduce((s,i)=>s+i.cantitate,0);
+  cartCount.textContent = totalQty;
+  if(cart.length===0){ cartContainer.innerHTML='<p>Coșul este gol.</p>'; return; }
+  let html='<table><tr><th>Produs</th><th>Pret</th><th>Cantitate</th><th>Subtotal</th><th>Sterge</th></tr>';
+  cart.forEach((item,idx)=>{const subtotal=item.price*item.cantitate;html+=`<tr data-index="${idx}"><td>${item.nume}</td><td>${item.price} RON</td><td><input class="qtyInput" type="number" min="1" value="${item.cantitate}" data-index="${idx}"></td><td>${subtotal} RON</td><td><button class="removeBtn" data-index="${idx}">X</button></td></tr>`});
+  const total=cart.reduce((s,i)=>s+i.price*i.cantitate,0);
+  html+=`<tr><th colspan="3">Total</th><th colspan="2">${total} RON</th></tr></table>`;
+  cartContainer.innerHTML=html;
+}
+
+// Navigation between sections with localStorage to remember
+function showSection(target){
+  Object.values(sections).forEach(s=>s.classList.remove('active'));
+  if(sections[target]) sections[target].classList.add('active');
+  navLinks.forEach(n=>n.classList.remove('active'));
+  document.querySelector(`.nav-link[data-target="${target}"]`).classList.add('active');
+  localStorage.setItem('activeSection', target);
+}
+
+// Restore section on load
+const savedSection = localStorage.getItem('activeSection') || 'home';
+showSection(savedSection);
+
+// Nav click events
+navLinks.forEach(a=>a.addEventListener('click',()=> showSection(a.dataset.target)));
+openCartBtn.addEventListener('click',()=> showSection('cart'));
+
+// Product container click
+produseContainer.addEventListener('click', e => {
+  const addBtn = e.target.closest('.add-cart-btn');
+  if(addBtn){
+    const card = addBtn.closest('.produs');
+    const nume = card.dataset.nume;
+    const price = Number(card.dataset.price);
+    const id = card.dataset.id;
+    const existing = cart.find(p=>p.id===id);
+    if(existing) existing.cantitate++; else cart.push({id,nume,price,cantitate:1});
+    updateCartUI();
+    notification.textContent=`${nume} a fost adăugat în coș.`; notification.classList.add('show'); setTimeout(()=>notification.classList.remove('show'),3000);
+    return;
+  }
+
+  const card = e.target.closest('.produs');
+  if(!card) return;
+
+  if(card.dataset.id === 'pantofar'){
+    currentLightboxImages = [
+      'https://github.com/15tef/Cozonacii/blob/main/564aedf4-5601-4670-9e6c-b7f0da05cf70.jpg?raw=true',
+      'https://github.com/15tef/Cozonacii/blob/main/1eceb059-7321-41ff-87d0-b914fbf11110.jpg?raw=true',
+      'https://github.com/15tef/Cozonacii/blob/main/5b20797e-2242-4ae4-b686-2787f57303ca.jpg?raw=true',
+      'https://github.com/15tef/Cozonacii/blob/main/dc506ebb-924a-42c4-b4fc-0357b9c56069.jpg?raw=true'
+    ];
+  } else if(card.dataset.id === 'dressing'){
+    currentLightboxImages = [
+      'https://github.com/15tef/Cozonacii/blob/main/64c98023-2739-45d1-85f3-04a107ef2142.jpg?raw=true',
+      'https://github.com/15tef/Cozonacii/blob/main/79700444-3a5f-4266-a830-7e295c627c88.jpg?raw=true',
+      'https://github.com/15tef/Cozonacii/blob/main/c04c9932-4605-432f-8150-3990ca85cca8.jpg?raw=true'
+    ];
+  }
+  currentImgIndex = 0;
+  lightboxImg.src = currentLightboxImages[currentImgIndex];
+  lightbox.classList.add('active');
+});
+
+// Lightbox navigation functions
+function showLightboxImage(index){
+  currentImgIndex = (index + currentLightboxImages.length) % currentLightboxImages.length;
+  lightboxImg.src = currentLightboxImages[currentImgIndex];
+}
+prevArrow.addEventListener('click', ()=> showLightboxImage(currentImgIndex-1));
+nextArrow.addEventListener('click', ()=> showLightboxImage(currentImgIndex+1));
+closeLightbox.addEventListener('click', ()=> lightbox.classList.remove('active'));
+lightbox.addEventListener('click', e => { if(e.target===lightbox) lightbox.classList.remove('active'); });
+document.addEventListener('keydown', e => {
+  if(!lightbox.classList.contains('active')) return;
+  if(e.key==='ArrowLeft') showLightboxImage(currentImgIndex-1);
+  if(e.key==='ArrowRight') showLightboxImage(currentImgIndex+1);
+  if(e.key==='Escape') lightbox.classList.remove('active');
+});
+
+// Cart events
+cartContainer.addEventListener('input', e=>{if(e.target.classList.contains('qtyInput')){const idx=Number(e.target.dataset.index);const val=parseInt(e.target.value,10);if(!isNaN(val)&&val>0){cart[idx].cantitate=val;updateCartUI();}}});
+cartContainer.addEventListener('click', e=>{if(e.target.classList.contains('removeBtn')){const idx=Number(e.target.dataset.index);cart.splice(idx,1);updateCartUI();}});
+
+checkoutBtn.addEventListener('click', ()=>{
+  if(cart.length===0){notification.textContent='Coșul este gol!';notification.classList.add('show');setTimeout(()=>notification.classList.remove('show'),3000);return;}
+  popup.classList.add('active');document.body.classList.add('modal-open');
+});
+closePopup.addEventListener('click',()=>{popup.classList.remove('active');document.body.classList.remove('modal-open');});
+
+orderForm.addEventListener('submit', e=>{
+  e.preventDefault();
+  alert('Comanda trimisă!');
+  cart=[];updateCartUI();popup.classList.remove('active');document.body.classList.remove('modal-open');
+});
+
+updateCartUI();
+</script>
+</body>
+</html>
